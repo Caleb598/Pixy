@@ -1,0 +1,69 @@
+import pygame
+import random
+
+# Initialize pygame
+pygame.init()
+
+# Set up display
+width, height = 640, 480
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Animation Program")
+
+# Set up clock
+clock = pygame.time.Clock()
+
+# Define colors
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+
+# Define ball class
+class Ball:
+    def __init__(self):
+        self.radius = 20
+        self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        self.x = random.randint(self.radius, width - self.radius)
+        self.y = random.randint(self.radius, height - self.radius)
+        self.vx = random.randint(-10, 10)
+        self.vy = random.randint(-10, 10)
+    
+    def update(self):
+        self.x += self.vx
+        self.y += self.vy
+        if self.x < self.radius or self.x > width - self.radius:
+            self.vx *= -1
+        if self.y < self.radius or self.y > height - self.radius:
+            self.vy *= -1
+    
+    def draw(self, surface):
+        pygame.draw.circle(surface, self.color, (int(self.x), int(self.y)), self.radius)
+
+# Create balls
+num_balls = 10
+balls = [Ball() for i in range(num_balls)]
+
+# Main loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+    # Update balls
+    for ball in balls:
+        ball.update()
+    
+    # Draw balls
+    screen.fill(white)
+    for ball in balls:
+        ball.draw(screen)
+    pygame.display.flip()
+    
+    # Limit frame rate
+    clock.tick(24)
+
+# Clean up
+pygame.quit()
