@@ -1,0 +1,86 @@
+bl_info = {
+    "name": "Pixy",
+    "blender": (2, 80, 0),
+    "category": "Render",
+}
+import bpy
+
+
+def pixelate_render(scene):
+    # Check if pixelation settings are enabled
+    if scene.custom_pixelation.enable_pixelation:
+        resolution_x = scene.custom_pixelation.resolution_x
+        resolution_y = scene.custom_pixelation.resolution_y
+        pixelation_factor = scene.custom_pixelation.pixelation_factor
+
+        # Set the initial pixelation level (e.g., render at low resolution)
+        bpy.context.scene.render.resolution_x = resolution_x
+        bpy.context.scene.render.resolution_y = resolution_y
+
+        # Define the total frames for the animation
+        total_frames = scene.frame_end - scene.frame_start
+
+        # Calculate the step size to reduce pixelation over time
+        step_size = (resolution_x - resolution_y) / total_frames
+
+        # Iterate over frames and gradually increase resolution
+        for frame in range(scene.frame_start, scene.frame_end + 1):
+            scene.frame_set(frame)
+
+            # Update the resolution for the current frame
+            bpy.context.scene.render.resolution_x -= step_size
+            bpy.context.scene.render.resolution_y -= step_size
+
+            # Apply pixelation effect
+            bpy.context.scene.render.image_settings.file_format = 'PNG'
+            bpy.context.scene.render.image_settings.color_depth = '8'
+            bpy.context.scene.render.image_settings.compression = 0
+            bpy.context.scene.render.image_settings.use_color_management = False
+
+            # Render the frame
+            bpy.ops.render.render(write_still=True)
+
+
+# Custom properties for pixelation settings
+class CustomPixelationSettings(bpy.types.PropertyGroup):
+    enable_pixelation: bpy.props.BoolProperty(name="Enable Pixelation", default=False)
+    resolution_x: bpy.props.IntProperty(name="Resolution X", default=256, min=1)
+    resolution_y: bpy.props.IntProperty(name="Resolution Y", default=256, min=1)
+    pixelation_factor: bpy.props.FloatProperty(name="Pixelation Factor", default=0.0, min=0.0, max=100.0)
+
+
+# Add custom properties to Render Properties tab
+def add_pixelation_settings(self, context):
+    layout = self.layout
+    scene = context.scene
+    layout.use_property_split = True
+
+    col = layout.column(align=True)
+    col.prop(scene.custom_pixelation, "enable_pixelation")
+    col.prop(scene.custom_pixelation, "resolution_x")
+    col.prop(scene.custom_pixelation, "resolution_y")
+    col.prop(scene.custom_pixelation, "pixelation_factor")
+
+
+classes = (
+    CustomPixelationSettings,
+)
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    bpy.types.Scene.custom_pixelation = bpy.props.PointerProperty(type=CustomPixelationSettings) 
+    bpy.app.handlers.render_pre.append(pixelate_render)
+
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    bpy.types.RENDER_PT_dimensions.remove(add_pixelation_settings)
+    bpy.app.handlers.render_pre.remove(pixelate_render)
+
+
+if __name__ == "__main__":
+    register()
+'Pixy_addon.py'
