@@ -3,19 +3,20 @@ bl_info = {
     "author": "Caleb Burnett",
     "version": (1, 0, 0),
     "blender": (2, 80, 0),
-    "location": "Preferences > Add-ons",
-    "description": "Pixelate Effect",
+    "location": "View3D > Tools",
+    "description": "Pixelated render effect.",
     "category": "Render",
 }
+
 import bpy
 
 
 # Define the custom panel class
 class CustomPanel(bpy.types.Panel):
     bl_label = "Pixy"
-    bl_idname = "OBJECT_PT_pixy"
-    bl_space_type = 'Preferences'
-    bl_region_type = 'Render'
+    bl_idname = "OBJECT_PT_Pixy"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
     bl_category = 'Pixy'
 
     def draw(self, context):
@@ -36,6 +37,7 @@ def unregister():
 # Enable add-on and register the classes
 if __name__ == "__main__":
     register()
+
 import bpy
 
 
@@ -117,3 +119,5 @@ def unregister():
 if __name__ == "__main__":
     register()
 'Pixy.py'
+bpy.types.Operator
+bpy.types.Panel
