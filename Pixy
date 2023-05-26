@@ -9,12 +9,30 @@ bl_info = {
 }
 
 import bpy
+
+# Set the initial and final sample counts
+initial_samples = 16
+final_samples = 256
+num_steps = 10
+
+# Calculate the increment for each step
+sample_increment = (final_samples - initial_samples) / num_steps
+
+# Render the image with increasing sample counts
+for i in range(num_steps):
+    # Set the current sample count
+    sample_count = int(initial_samples + (i * sample_increment))
+    bpy.context.scene.cycles.samples = sample_count
+    
+    # Render the image
+    bpy.ops.render.render(write_still=True)
+import bpy
 from math import ceil
 
 
 # Custom Render Engine
 class PixelatedRenderEngine(bpy.types.RenderEngine):
-    bl_idname = "pixy"
+    bl_idname = "Pixy"
     bl_label = "Pixy"
     bl_use_preview = True
 
@@ -78,7 +96,7 @@ class PixelatedRenderPanel(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
 
-        layout.prop(scene, "pixelation_factor", text="Pixelation Factor")
+        layout.prop(scene, "pixelation_factor", text="Pixelation")
 
 
 # Register Classes
@@ -86,9 +104,9 @@ def register():
     bpy.utils.register_class(PixelatedRenderEngine)
     bpy.utils.register_class(PixelatedRenderPanel)
     bpy.types.Scene.pixelation_factor = bpy.props.IntProperty(
-        name="Pixelation Factor",
-        default=8,
-        min=1,
+        name="Pixelation",
+        default=0,
+        min=0,
         max=32
     )
 
@@ -112,7 +130,6 @@ import bpy
 for obj in bpy.context.scene.objects:
     if obj.type == 'MESH':
         # Check if the object has a material assigned
-        if len(obj.data.materials) == 0:
             # Create a new material
             material = bpy.data.materials.new(name="MyMaterial")
             # Assign the material to the object
@@ -439,7 +456,7 @@ scene.camera = camera_object
 import bpy
 
 # Names of the objects to keep
-objects_to_keep = ["Camera", "PointLight"]
+objects_to_keep = ["MyCamera", "PointLight"]
 
 # Iterate through all objects in the scene
 for obj in bpy.data.objects:
@@ -544,3 +561,197 @@ def set_material_preview_to_rendered_mode():
 
 # Call the function to change the viewport mode
 set_material_preview_to_rendered_mode()
+import bpy
+
+def draw_callback_px(self, context):
+    # Your rendering logic goes here
+
+    # Example: Clear the viewport
+    bpy.context.window_manager.bars = True
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+
+# Register the draw handler
+args = (None, None)  # Additional arguments if needed
+bpy.types.SpaceView3D.draw_handler_add(draw_callback_px, args, 'WINDOW', 'POST_VIEW')
+import bpy
+
+# Add a new object (example: cube)
+bpy.ops.mesh.primitive_cube_add()
+
+# Get the reference to the newly added object
+new_object = bpy.context.active_object
+
+# Set the name of the object to "Object"
+new_object.name = "Object"
+import bpy
+# Trigger a redraw to update the viewport
+bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+import bpy
+
+# Get the active object (assuming it's already selected)
+obj = bpy.context.active_object
+
+# Create a new material
+mat = bpy.data.materials.new(name="MyMaterial")
+obj.data.materials.append(mat)
+
+# Set the diffuse color of the material
+mat.diffuse_color = (1.0, 0.0, 0.0, 1.0)  # (R, G, B, Alpha)
+
+# Set the specular color of the material
+mat.specular_color = (0.5, 0.5, 0.5)
+
+# Set the object to use the assigned material
+obj.active_material = mat
+import bpy
+
+# Get the active 3D View area
+area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+
+# Set the shading mode to Solid in the active 3D View area
+for space in area.spaces:
+    if space.type == 'VIEW_3D':
+        space.shading.type = 'SOLID'
+
+import bpy
+
+# Create a new camera object
+camera_data = bpy.data.cameras.new(name="MyCamera")
+camera_object = bpy.data.objects.new(name="MyCamera", object_data=camera_data)
+
+# Set the camera properties
+camera_object.location = (0, 0, 5)  # Set the position of the camera
+camera_object.rotation_euler = (0, 0, 0)  # Set the rotation of the camera
+
+# Add the camera to the scene
+scene = bpy.context.scene
+scene.collection.objects.link(camera_object)
+
+# Set the newly created camera as the active camera
+scene.camera = camera_object
+import bpy
+
+# Set the desired render settings (optional)
+bpy.context.scene.render.image_settings.file_format = 'PNG'
+bpy.context.scene.render.filepath = '/path/to/save/render.png'
+
+# Trigger the render operation
+bpy.ops.render.render(write_still=True)
+import bpy
+
+# Set the render engine
+bpy.context.scene.render.engine = 'Pixy'  # Use the Pixy render engine
+
+# Set the render resolution
+bpy.context.scene.render.resolution_x = 1920
+bpy.context.scene.render.resolution_y = 1080
+
+# Set the number of samples for rendering
+bpy.context.scene.cycles.samples = 100
+
+# Set the output file format and path
+bpy.context.scene.render.image_settings.file_format = 'PNG'
+bpy.context.scene.render.filepath = '/path/to/save/render.png'
+
+# Set other render settings as needed
+# ...
+
+# Render the image
+bpy.ops.render.render(write_still=True)
+import bpy
+from bpy.types import Panel
+
+# Custom panel class for render settings
+class RenderSettingsPanel(Panel):
+    bl_idname = "RENDER_PT_custom_panel"
+    bl_label = "Custom Render Settings"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "render"
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
+        # Add a collapsible panel
+        box = layout.box()
+        box.label(text="Render Settings")
+        
+        # Add settings within the panel
+        box.prop(scene.render, "resolution_x")
+        box.prop(scene.render, "resolution_y")
+        
+        # Add a setting with limits
+        box.prop(scene.render, "frame_start")
+        box.prop(scene.render, "frame_end")
+        box.prop(scene.render, "frame_step")
+
+        # Example: Set limits for a numeric property
+        box.prop(scene.render, "fps_base")
+        box.prop(scene.render, "fps", text="FPS (Frames Per Second)", slider=True)
+
+# Register the custom panel
+def register():
+    bpy.utils.register_class(RenderSettingsPanel)
+
+# Unregister the custom panel
+def unregister():
+    bpy.utils.unregister_class(RenderSettingsPanel)
+
+# Register the panel when running the script directly
+if __name__ == "__main__":
+    register()
+import bpy
+from bpy.types import Panel
+
+# Custom panel class for output settings
+class CustomOutputPanel(Panel):
+    bl_idname = "OUTPUT_PT_custom_panel"
+    bl_label = "Sample Settings"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "output"
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
+        # Add panel contents
+        layout.label(text="Sample Settings")
+        layout.prop(scene.custom_output_settings, "sample_count")
+
+# Register the custom panel
+def register():
+    bpy.utils.register_class(CustomOutputPanel)
+    bpy.types.Scene.custom_output_settings = bpy.props.PointerProperty(type=CustomOutputSettings)
+
+# Unregister the custom panel
+def unregister():
+    bpy.utils.unregister_class(CustomOutputPanel)
+    del bpy.types.Scene.custom_output_settings
+
+# Custom property group for output settings
+class CustomOutputSettings(bpy.types.PropertyGroup):
+    sample_count: bpy.props.IntProperty(
+        name="Sample Count",
+        description="Number of samples",
+        default=16,
+        min=1,
+        max=256
+    )
+
+# Register the property group
+def register():
+    bpy.utils.register_class(CustomOutputPanel)
+    bpy.utils.register_class(CustomOutputSettings)
+    bpy.types.Scene.custom_output_settings = bpy.props.PointerProperty(type=CustomOutputSettings)
+
+# Unregister the property group
+def unregister():
+    bpy.utils.unregister_class(CustomOutputPanel)
+    bpy.utils.unregister_class(CustomOutputSettings)
+    del bpy.types.Scene.custom_output_settings
+
+# Register the panel and property group when running the script directly
+if __name__ == "__main__":
+    register()
