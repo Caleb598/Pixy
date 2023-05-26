@@ -98,7 +98,7 @@ def unregister():
     del bpy.types.Scene.pixelation_factor
     bpy.utils.unregister_class(PixelatedRenderPanel)
     bpy.utils.unregister_class(PixelatedRenderEngine)
-    
+
 
 # Register Add-on
 if __name__ == "__main__":
@@ -531,3 +531,16 @@ def invoke_custom_render_engine(self, context):
     start_custom_render_engine()
     # Additional logic specific to your custom render engine
     return {'FINISHED'}
+import bpy
+
+def set_material_preview_to_rendered_mode():
+    # Set the viewport shading mode to RENDERED
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    space.shading.type = 'MATERIAL'
+                    break
+
+# Call the function to change the viewport mode
+set_material_preview_to_rendered_mode()
