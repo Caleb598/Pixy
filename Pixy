@@ -16,7 +16,7 @@ from math import ceil
 class PixelatedRenderEngine(bpy.types.RenderEngine):
     bl_idname = "pixy"
     bl_label = "Pixy"
-    bl_use_preview = False
+    bl_use_preview = True
 
     def __init__(self):
         super().__init__()
@@ -98,8 +98,436 @@ def unregister():
     del bpy.types.Scene.pixelation_factor
     bpy.utils.unregister_class(PixelatedRenderPanel)
     bpy.utils.unregister_class(PixelatedRenderEngine)
-
+    
 
 # Register Add-on
 if __name__ == "__main__":
     register()
+import bpy
+
+# Render the scene
+import bpy
+
+# Loop through all objects in the scene
+for obj in bpy.context.scene.objects:
+    if obj.type == 'MESH':
+        # Check if the object has a material assigned
+        if len(obj.data.materials) == 0:
+            # Create a new material
+            material = bpy.data.materials.new(name="MyMaterial")
+            # Assign the material to the object
+            obj.data.materials.append(material)
+import bpy
+
+# Create a new material
+material = bpy.data.materials.new(name="MyMaterial")
+
+# Assign a color to the material
+material.use_nodes = True
+material.node_tree.nodes.clear()
+output_node = material.node_tree.nodes.new('ShaderNodeOutputMaterial')
+diffuse_node = material.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+material.node_tree.links.new(diffuse_node.outputs['BSDF'], output_node.inputs['Surface'])
+
+# Get the active object
+obj = bpy.context.active_object
+
+# Assign the material to the object
+
+# Switch to "Rendered" mode for previewing the material
+for area in bpy.context.screen.areas:
+    if area.type == 'VIEW_3D':
+        for space in area.spaces:
+            if space.type == 'VIEW_3D':
+                space.shading.type = 'MATERIAL'
+                break
+import bpy
+import bgl
+import blf
+
+# Define your custom render engine class
+class CustomRenderEngine(bpy.types.RenderEngine):
+    bl_idname = "Pixy"
+    bl_label = "Pixy"
+
+    def __init__(self):
+        super().__init__()
+
+    def render(self, scene):
+        # Perform rendering calculations and output the result to the viewport or a file
+        # You can access scene data, such as objects, materials, and lights using the 'scene' parameter
+        
+        # Example: Rendering code that outputs a simple red image
+        width = scene.render.resolution_x
+        height = scene.render.resolution_y
+        pixels = [1.0, 0.0, 0.0] * (width * height)  # Red pixels
+
+        # Display the rendered image in the viewport
+        self.display_pixels(pixels, width, height)
+
+    def view_update(self, context, depsgraph):
+        # Display the rendered image in the Blender viewport
+        self.display_pixels(self.pixels, self.width, self.height)
+
+    def display_pixels(self, pixels, width, height):
+        # Create an OpenGL texture and display the rendered image in the viewport
+        tex_id = bgl.glGenTextures(1)
+        bgl.glBindTexture(bgl.GL_TEXTURE_2D, tex_id)
+        bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGB, width, height, 0, bgl.GL_RGB, bgl.GL_FLOAT, pixels)
+
+        # Rest of the display_pixels implementation remains the same
+
+    def update(self, data, depsgraph):
+        # Update any engine-specific data when the scene changes
+        pass
+
+    def report(self, report_type, message):
+        # Handle reporting of errors, warnings, and other messages
+        pass
+
+# Register the custom render engine addon
+def register():
+    bpy.utils.register_class(CustomRenderEngine)
+
+# Unregister the custom render engine addon
+def unregister():
+    bpy.utils.unregister_class(CustomRenderEngine)
+import bpy
+
+# Create a new material or access an existing material
+material = bpy.data.materials.new(name="MyMaterial")
+
+# Clear existing nodes in the material's node tree
+material.use_nodes = True
+material.node_tree.nodes.clear()
+
+# Create a Principled BSDF node
+principled_node = material.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+
+# Set the base color of the material
+principled_node.inputs[0].default_value = (0.8, 0.2, 0.4, 1.0)  # RGBA values
+
+# Create a Subsurface Scattering node
+sss_node = material.node_tree.nodes.new('ShaderNodeSubsurfaceScattering')
+
+# Set the radius for subsurface scattering
+sss_node.inputs[0].default_value = (0.1, 0.1, 0.1, 0.1)
+
+# Create the Material Output node
+output_node = material.node_tree.nodes.new('ShaderNodeOutputMaterial')
+
+# Link the nodes together
+material.node_tree.links.new(principled_node.outputs[0], output_node.inputs[0])
+material.node_tree.links.new(sss_node.outputs[0], principled_node.inputs[0])
+
+# Assign the material to the selected object
+
+# Update the object and the viewport
+bpy.context.view_layer.update()
+bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+import bpy
+
+# Access the active material or create a new one
+if material is None:
+    material = bpy.data.materials.new(name="MyMaterial")
+# Enable the use of nodes and clear existing nodes
+material.use_nodes = True
+material.node_tree.nodes.clear()
+# Create the Subsurface Scattering node
+sss_node = material.node_tree.nodes.new('ShaderNodeSubsurfaceScattering')
+# Set the radius for subsurface scattering
+sss_node.inputs['Radius'].default_value = (0.1, 0.1, 0.1)
+# Get the Material Output node
+output_node = material.node_tree.nodes.get('Material Output')
+
+# Connect the SSS node to the Material Output node
+# Update the material
+material.update_tag()
+
+# Update the object and the viewport
+bpy.context.view_layer.update()
+bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+import bpy
+
+# Create a new point light
+light_data = bpy.data.lights.new(name="PointLight", type='POINT')
+light_object = bpy.data.objects.new(name="PointLight", object_data=light_data)
+
+# Set light properties
+light_object.location = (0, 0, 3)  # Position of the light
+light_data.energy = 100.0  # Intensity of the light
+
+# Link the light to the scene
+scene = bpy.context.scene
+scene.collection.objects.link(light_object)
+
+# Set the light as the active object
+bpy.context.view_layer.objects.active = light_object
+light_object.select_set(True)
+import bpy
+from bpy.types import Panel
+
+# Custom Render Settings Panel
+class CustomRenderSettingsPanel(Panel):
+    bl_label = "Custom Render Settings"
+    bl_idname = "RENDER_PT_custom_render_settings"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "render"
+    bl_category = "Custom"
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
+        # Example: Custom Render Engine Settings
+        layout.prop(scene.custom_render_settings, "property1")
+        layout.prop(scene.custom_render_settings, "property2")
+        # Add more properties as needed
+
+
+# Register the Custom Render Settings Panel
+def register():
+    bpy.utils.register_class(CustomRenderSettingsPanel)
+
+
+# Unregister the Custom Render Settings Panel
+def unregister():
+    bpy.utils.unregister_class(CustomRenderSettingsPanel)
+
+
+# Example usage: Create Custom Render Engine Settings
+class CustomRenderEngineSettings(bpy.types.PropertyGroup):
+    property1: bpy.props.BoolProperty(name="Property 1")
+    property2: bpy.props.IntProperty(name="Property 2", default=0)
+
+
+# Register the Custom Render Engine Settings
+def register():
+    bpy.utils.register_class(CustomRenderSettingsPanel)
+    bpy.utils.register_class(CustomRenderEngineSettings)
+    bpy.types.Scene.custom_render_settings = bpy.props.PointerProperty(type=CustomRenderEngineSettings)
+
+
+# Unregister the Custom Render Engine Settings
+def unregister():
+    bpy.utils.unregister_class(CustomRenderSettingsPanel)
+    bpy.utils.unregister_class(CustomRenderEngineSettings)
+    del bpy.types.Scene.custom_render_settings
+
+
+# Register the panel and custom render settings
+register()
+import bpy
+
+# Create a light object
+light_data = bpy.data.lights.new(name="Light", type='POINT')
+light_object = bpy.data.objects.new(name="Light", object_data=light_data)
+bpy.context.collection.objects.link(light_object)
+
+# Create a material with emissive properties
+material = bpy.data.materials.new(name="EmissiveMaterial")
+material.use_nodes = True
+nodes = material.node_tree.nodes
+links = material.node_tree.links
+
+# Clear default nodes
+nodes.clear()
+
+# Create an emission node
+emission_node = nodes.new(type="ShaderNodeEmission")
+emission_node.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)  # Set emission color
+emission_node.inputs[1].default_value = 10.0  # Set emission strength
+
+# Create a material output node
+output_node = nodes.new(type="ShaderNodeOutputMaterial")
+
+# Connect the emission node to the output node
+links.new(emission_node.outputs[0], output_node.inputs[0])
+
+# Assign the material to the light object
+
+# Set the light object as visible in the Material Preview mode
+light_object.show_in_front = True
+import bpy
+
+# Create a light object
+light_data = bpy.data.lights.new(name="CustomLight", type='POINT')
+light_object = bpy.data.objects.new(name="CustomLightObject", object_data=light_data)
+bpy.context.collection.objects.link(light_object)
+
+# Add custom properties to the light object
+light_object["Light Intensity"] = 0.0
+
+# Define a property group for the light object properties
+class LightObjectProperties(bpy.types.PropertyGroup):
+    custom_property_1: bpy.props.FloatProperty(
+        name="Light Intensity",
+        min=0.0,  # Minimum value
+        max=1000.0,  # Maximum value
+        default=0.0,
+    )
+
+# Register the property group
+bpy.utils.register_class(LightObjectProperties)
+
+# Add the property group to the light object
+bpy.types.Object.light_object_properties = bpy.props.PointerProperty(type=LightObjectProperties)
+
+# Define a panel to display the custom properties
+class LightObjectPropertiesPanel(bpy.types.Panel):
+    bl_label = "Light Object Properties"
+    bl_idname = "OBJECT_PT_light_object_properties"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "data"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.object and context.object.type == 'LIGHT'
+
+    def draw(self, context):
+        layout = self.layout
+        light_object = context.object
+
+        # Draw the custom properties
+        layout.prop(light_object.light_object_properties, "custom_property_1")
+
+# Register the panel
+bpy.utils.register_class(LightObjectPropertiesPanel)
+import bpy
+
+# Select the object that you want to emit light
+obj = bpy.context.object
+
+# Create a new material or use the existing material of the object
+
+# Clear all existing material nodes
+material.use_nodes = True
+material.node_tree.nodes.clear()
+
+# Add the Emission Shader node
+emission_node = material.node_tree.nodes.new(type="ShaderNodeEmission")
+
+# Set the emission color and strength
+emission_node.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)  # White color
+emission_node.inputs["Strength"].default_value = 10.0  # Adjust the strength as needed
+
+# Link the emission node to the output node
+# Connect the emission shader node to the output node
+import bpy
+
+# Get the default light
+# Iterate through all lights in the scene
+import bpy
+
+# Create a new camera object
+camera_data = bpy.data.cameras.new(name="Camera")
+camera_object = bpy.data.objects.new(name="Camera", object_data=camera_data)
+
+# Link the camera object to the scene
+scene = bpy.context.scene
+scene.collection.objects.link(camera_object)
+
+# Set the camera's location and rotation
+camera_object.location = (0, 0, 5)  # Adjust the coordinates as needed
+camera_object.rotation_euler = (0, 0, 0)  # Adjust the rotation angles as needed
+
+# Set the active camera in the scene
+scene.camera = camera_object
+import bpy
+
+# Names of the objects to keep
+objects_to_keep = ["Camera", "PointLight"]
+
+# Iterate through all objects in the scene
+for obj in bpy.data.objects:
+    if obj.name not in objects_to_keep:
+        bpy.data.objects.remove(obj, do_unlink=True)
+import bpy
+
+class CustomRenderEngine(bpy.types.RenderEngine):
+    bl_idname = "Pixy"
+    bl_label = "Pixy"
+
+    def __init__(self):
+        # Initialize your custom render engine
+        pass
+    
+    def render(self, scene):
+        # Render the scene using your custom engine
+        pass
+
+    def set_world_color(self, color):
+        # Set the world color in your custom render engine
+        pass
+
+    def material_preview_mode(self):
+        # Enable the material preview mode for your custom engine
+        print("Rendered mode enabled")
+
+# Register the custom render engine in Blender
+bpy.utils.register_class(CustomRenderEngine)
+
+# Set the render engine to your custom engine
+bpy.context.scene.render.engine = 'Pixy'
+
+# Define a callback function to update the world color
+def update_world_color(scene, depsgraph):
+    world_color = bpy.context.scene.world.custom_color
+    custom_engine.set_world_color(world_color)
+
+    # Add an extra indented block to trigger a redraw in the viewport
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.tag_redraw()
+
+# Add a color property to the World data
+bpy.types.World.custom_color = bpy.props.FloatVectorProperty(
+    name="Custom Color",
+    subtype='COLOR',
+    size=3,
+    default=(1.0, 1.0, 1.0),
+    min=0.0,
+    max=1.0,
+    update=update_world_color
+)
+
+# Define a function to enable material preview mode
+def enable_material_preview_mode(depsgraph, scene):
+    if bpy.context.scene.render.engine == 'Pixy':
+        custom_engine.material_preview_mode()
+
+# Register the function as a callback for the depsgraph_update_pre handler
+bpy.app.handlers.depsgraph_update_pre.append(enable_material_preview_mode)
+
+# Set the render engine to your custom engine
+bpy.context.scene.render.engine = 'Pixy'
+import bpy
+import bgl
+import blf
+def setup_viewport():
+    # Set viewport shading mode to Rendered
+    bpy.context.space_data.shading.type = 'RENDERED'
+def draw_callback_px(self, context):
+    # Code to render your custom engine in the viewport
+    # Use bgl and blf functions to draw directly to the viewport
+    pass
+def register_draw_handler():
+    bpy.types.SpaceView3D.draw_handler_add(draw_callback_px, (None, None), 'WINDOW', 'POST_PIXEL')
+
+def unregister_draw_handler():
+    bpy.types.SpaceView3D.draw_handler_remove(draw_callback_px, 'WINDOW')
+def start_custom_render_engine():
+    # Additional setup for your custom render engine
+    setup_viewport()
+    register_draw_handler()
+
+def stop_custom_render_engine():
+    unregister_draw_handler()
+    # Additional cleanup for your custom render engine
+def invoke_custom_render_engine(self, context):
+    start_custom_render_engine()
+    # Additional logic specific to your custom render engine
+    return {'FINISHED'}
