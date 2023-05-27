@@ -935,3 +935,43 @@ def unregister():
 # Entry point to register the custom classes
 if __name__ == "__main__":
     register()
+import bpy
+
+# Create a Point Light
+point_light_data = bpy.data.lights.new(name="PointLight", type='POINT')
+point_light_data.energy = 100.0  # Set the light intensity
+point_light_object = bpy.data.objects.new(name="PointLight", object_data=point_light_data)
+bpy.context.collection.objects.link(point_light_object)
+
+# Create a Directional Light
+directional_light_data = bpy.data.lights.new(name="DirectionalLight", type='SUN')
+directional_light_data.energy = 1.0  # Set the light intensity
+directional_light_object = bpy.data.objects.new(name="DirectionalLight", object_data=directional_light_data)
+bpy.context.collection.objects.link(directional_light_object)
+
+# Create a Spot Light
+spot_light_data = bpy.data.lights.new(name="SpotLight", type='SPOT')
+spot_light_data.energy = 1000.0  # Set the light intensity
+spot_light_data.spot_size = 1.0  # Set the spot size in radians
+spot_light_object = bpy.data.objects.new(name="SpotLight", object_data=spot_light_data)
+bpy.context.collection.objects.link(spot_light_object)
+import bpy
+
+# Get the value of the custom render property
+property1 = bpy.context.scene.custom_render_settings.property1
+
+# Create a Point Light
+point_light = bpy.data.lights.new(name="PointLight", type='POINT')
+point_light.energy = 1000.0  # Set the light intensity to a higher value
+
+# Create a light object and link it to the scene
+point_light_object = bpy.data.objects.new(name="PointLight", object_data=point_light)
+bpy.context.collection.objects.link(point_light_object)
+bpy.context.view_layer.objects.active = point_light_object
+
+# Enable or disable the light object for solid viewport shading
+if property1:
+    point_light_object.hide_viewport = False
+else:
+    point_light_object.hide_viewport = True
+    
