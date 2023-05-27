@@ -869,3 +869,69 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+import bpy
+from bpy.props import BoolProperty
+from bpy.types import Panel, Operator
+
+# Custom Shader Node
+class CustomShaderNode(bpy.types.ShaderNodeCustomGroup):
+    bl_label = "Custom Shader"
+    bl_idname = "CUSTOM_SHADER_NODE"
+
+    # Define the node's inputs and outputs
+    def init(self, context):
+        self.inputs.new("NodeSocketColor", "Color")
+        self.outputs.new("NodeSocketColor", "Output")
+
+    # Implement the shader logic
+    def update(self):
+        # Perform custom shader calculations here
+        pass
+
+# Custom Render Mode Panel
+class CustomRenderModePanel(bpy.types.Panel):
+    bl_label = "Custom Render Mode"
+    bl_idname = "VIEW3D_PT_custom_render_mode"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "Custom"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator("custom.set_render_mode", text="Enable Custom Render Mode")
+        layout.operator("custom.reset_render_mode", text="Disable Custom Render Mode")
+
+# Enable Custom Render Mode Operator
+class EnableCustomRenderModeOperator(Operator):
+    bl_idname = "custom.set_render_mode"
+    bl_label = "Enable Custom Render Mode"
+
+    def execute(self, context):
+        context.space_data.shading.type = 'RENDERED'
+        return {'FINISHED'}
+
+# Disable Custom Render Mode Operator
+class DisableCustomRenderModeOperator(Operator):
+    bl_idname = "custom.reset_render_mode"
+    bl_label = "Disable Custom Render Mode"
+
+    def execute(self, context):
+        context.space_data.shading.type = 'SOLID'
+        return {'FINISHED'}
+
+# Register the custom classes
+def register():
+    bpy.utils.register_class(CustomShaderNode)
+    bpy.utils.register_class(CustomRenderModePanel)
+    bpy.utils.register_class(EnableCustomRenderModeOperator)
+    bpy.utils.register_class(DisableCustomRenderModeOperator)
+
+def unregister():
+    bpy.utils.unregister_class(CustomShaderNode)
+    bpy.utils.unregister_class(CustomRenderModePanel)
+    bpy.utils.unregister_class(EnableCustomRenderModeOperator)
+    bpy.utils.unregister_class(DisableCustomRenderModeOperator)
+
+# Entry point to register the custom classes
+if __name__ == "__main__":
+    register()
