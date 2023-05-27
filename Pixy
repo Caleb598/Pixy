@@ -755,3 +755,117 @@ def unregister():
 # Register the panel and property group when running the script directly
 if __name__ == "__main__":
     register()
+import bpy
+
+
+class CustomColorProperties(bpy.types.PropertyGroup):
+    subsurface_scattering: bpy.props.FloatProperty(
+        name="Subsurface Scattering",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    clearcoat_gloss: bpy.props.FloatProperty(
+        name="Clearcoat Gloss",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    gloss: bpy.props.FloatProperty(
+        name="Gloss",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    sheen: bpy.props.FloatProperty(
+        name="Sheen",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    sheen_tint: bpy.props.FloatProperty(
+        name="Sheen Tint",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    anisotropic: bpy.props.FloatProperty(
+        name="Anisotropic",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    specular: bpy.props.FloatProperty(
+        name="Specular",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+    specular_tint: bpy.props.FloatProperty(
+        name="Specular Tint",
+        default=0.0,
+        min=0.0,
+        max=1.0
+    )
+
+
+class CustomColorPanel(bpy.types.Panel):
+    bl_label = "Object Properties"
+    bl_idname = "OBJECT_PT_object_properties"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "material"
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None and context.object.active_material is not None
+
+    def draw(self, context):
+        layout = self.layout
+        material = context.object.active_material
+
+        if material is not None:
+            custom_color_props = material.custom_color_props
+
+            # Subsurface Scattering
+            layout.prop(custom_color_props, "subsurface_scattering")
+
+            # Clearcoat Gloss
+            layout.prop(custom_color_props, "clearcoat_gloss")
+
+            # Gloss
+            layout.prop(custom_color_props, "gloss")
+
+            # Sheen
+            layout.prop(custom_color_props, "sheen")
+
+            # Sheen Tint
+            layout.prop(custom_color_props, "sheen_tint")
+
+            # Anisotropic
+            layout.prop(custom_color_props, "anisotropic")
+
+            # Specular
+            layout.prop(custom_color_props, "specular")
+
+            # Specular Tint
+            layout.prop(custom_color_props, "specular_tint")
+
+
+classes = (CustomColorPanel, CustomColorProperties)
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    bpy.types.Material.custom_color_props = bpy.props.PointerProperty(type=CustomColorProperties)
+
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    del bpy.types.Material.custom_color_props
+
+
+if __name__ == "__main__":
+    register()
