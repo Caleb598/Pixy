@@ -12,12 +12,68 @@ class PIXELATION_PT_Panel(bpy.types.Panel):
         layout = self.layout
 
         # Add panel content here
-        layout.label(text="Pixelation settings")
+        layout.label(text="Pixelation Settings")
 
         # Example: Add an animated property
         scene = context.scene
         layout.prop(scene, "pixel_scale_x")
         layout.prop(scene, "pixel_scale_y")
+
+
+# Register the panel and properties
+def register():
+    bpy.utils.register_class(PIXELATION_PT_Panel)
+    bpy.types.Scene.pixel_scale_x = bpy.props.FloatProperty(name="Pixel Scale X", default=1.0, min=0.01, max=10.0)
+    bpy.types.Scene.pixel_scale_y = bpy.props.FloatProperty(name="Pixel Scale Y", default=1.0, min=0.01, max=10.0)
+
+
+# Unregister the panel and properties
+def unregister():
+    bpy.utils.unregister_class(PIXELATION_PT_Panel)
+    del bpy.types.Scene.pixel_scale_x
+    del bpy.types.Scene.pixel_scale_y
+
+
+# Run the register() function when executing the script
+if __name__ == "__main__":
+    register()
+
+    # Set keyframes for animation
+    scene = bpy.context.scene
+    scene.frame_start = 1
+    scene.frame_end = 100
+    scene.pixel_scale_x = 1.0
+    scene.pixel_scale_y = 1.0
+
+    scene.frame_set(scene.frame_start)
+    scene.keyframe_insert(data_path="pixel_scale_x")
+    scene.keyframe_insert(data_path="pixel_scale_y")
+
+    scene.frame_set(scene.frame_end)
+    scene.pixel_scale_x = 10.0
+    scene.pixel_scale_y = 10.0
+    scene.keyframe_insert(data_path="pixel_scale_x")
+    scene.keyframe_insert(data_path="pixel_scale_y")
+import bpy
+
+# Define the custom panel class
+class PIXELATION_PT_Panel(bpy.types.Panel):
+    bl_label = "Pixelation"
+    bl_idname = "PIXELATION_PT_panel"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "output"
+
+    def draw(self, context):
+        layout = self.layout
+
+        # Add panel content here
+        layout.label(text="Pixelation Settings")
+
+        # Example: Add an animated property with animation dot
+        scene = context.scene
+        layout.prop(scene, "pixel_scale_x", icon='FCURVE')
+        layout.prop(scene, "pixel_scale_y", icon='FCURVE')
 
 
 # Register the panel and properties
@@ -86,3 +142,5 @@ for frame in range(frame_start, frame_end + 1):
     bpy.ops.render.render(write_still=True)
     
     # Set the final resolution for the next frame
+    bpy.context.scene.render.resolution_x = final_scale[0]
+    bpy.context.scene.render.resolution_y = final_scale[1]
