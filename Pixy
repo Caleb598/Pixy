@@ -983,3 +983,63 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+import bpy
+
+light_name = "PointLight"
+
+# Find the light by name in the scene collection
+light = bpy.context.scene.collection.objects.get(light_name)
+
+if light and light.type == 'POINT':
+    # Unhide the light and enable it
+    light.hide_viewport = False
+    light.data.use_nodes = True
+    print("Fixed light:", light.name)
+else:
+    print("Light not found or is not a valid light:", light_name)
+import bpy
+
+object_name = "Object"
+
+# Find the object by name
+obj = bpy.data.objects.get(object_name)
+
+if obj is not None:
+    # Set the object's location to the origin
+    obj.location = (0, 0, 0)
+    print("Object '{}' set to origin.".format(obj.name))
+else:
+    print("Object '{}' not found.".format(object_name))
+import bpy
+
+# Get the active object (the newly added cube)
+active_object = bpy.context.active_object
+
+# Rename the active object to "Object"
+active_object.name = "Object"
+import bpy
+
+# Get the Compositor node tree
+tree = bpy.context.scene.node_tree
+
+# Clear existing nodes
+tree.nodes.clear()
+
+# Create the Render Layers node
+render_layers_node = tree.nodes.new(type='CompositorNodeRLayers')
+render_layers_node.location = (0, 0)  # Set the node's position
+
+# Create the Set Alpha node
+set_alpha_node = tree.nodes.new(type='CompositorNodeSetAlpha')
+set_alpha_node.location = (200, 0)  # Set the node's position
+
+# Set the alpha value
+set_alpha_node.inputs[1].default_value = 1.0  # Set the alpha value to 1
+
+# Create the Composite node
+composite_node = tree.nodes.new(type='CompositorNodeComposite')
+composite_node.location = (400, 0)  # Set the node's position
+
+# Connect the nodes
+tree.links.new(render_layers_node.outputs['Image'], set_alpha_node.inputs[0])
+tree.links.new(set_alpha_node.outputs['Image'], composite_node.inputs[0])
