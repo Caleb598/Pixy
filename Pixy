@@ -93,6 +93,64 @@ def unregister():
 # Run the register() function when executing the script
 if __name__ == "__main__":
     register()
+import bpy
+
+# Set the initial resolution percentage
+initial_resolution_percentage = 50
+
+# Set the final resolution percentage
+final_resolution_percentage = 100
+
+# Set the animation frame range
+start_frame = 1
+end_frame = 100
+
+# Calculate the resolution increment
+resolution_increment = (final_resolution_percentage - initial_resolution_percentage) / (end_frame - start_frame)
+
+# Set the render properties
+bpy.context.scene.render.image_settings.file_format = 'PNG'
+
+# Animate the resolution over time
+for frame in range(start_frame, end_frame + 1):
+    bpy.context.scene.frame_set(frame)
+
+    # Calculate the current resolution percentage
+    current_resolution_percentage = initial_resolution_percentage + (resolution_increment * (frame - start_frame))
+    current_resolution_percentage = round(current_resolution_percentage)  # Round to nearest integer
+
+    # Set the current resolution percentage
+    bpy.context.scene.render.resolution_percentage = current_resolution_percentage
+
+    # Render the frame
+    bpy.ops.render.render(write_still=True)
+
+    # Apply pixelation effect in the compositor
+    bpy.context.scene.use_nodes = True
+    tree = bpy.context.scene.node_tree
+
+    # Clear existing nodes
+    for node in tree.nodes:
+        tree.nodes.remove(node)
+
+    # Create the necessary nodes
+    render_layers_node = tree.nodes.new('CompositorNodeRLayers')
+    scale_node = tree.nodes.new('CompositorNodeScale')
+    scale_node.space = 'RENDER_SIZE'
+    scale_node.inputs[1].default_value = current_resolution_percentage / 100.0
+    composite_node = tree.nodes.new('CompositorNodeComposite')
+
+    # Connect the nodes
+    tree.links.new(render_layers_node.outputs[0], scale_node.inputs[0])
+    tree.links.new(scale_node.outputs[0], composite_node.inputs[0])
+
+    # Render the composited image
+    bpy.ops.render.render(write_still=True)
+
+    # Reset the compositor for the next frame
+    bpy.context.scene.use_nodes = False
+    for node in tree.nodes:
+        tree.nodes.remove(node)
 
 import bpy
 
@@ -127,8 +185,8 @@ bpy.context.scene.frame_start = frame_start
 bpy.context.scene.frame_end = frame_end
 
 # Set up the pixel size
-initial_scale = (1024, 1024)  # Adjust the initial pixel size as desired
-final_scale = (512, 512)  # Adjust the final pixel size as desired
+initial_scale = (1920, 1080)  # Adjust the initial pixel size as desired
+final_scale = (1920, 1080)  # Adjust the final pixel size as desired
 
 # Generate the frames with different resolutions
 for frame in range(frame_start, frame_end + 1):
