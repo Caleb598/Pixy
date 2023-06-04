@@ -16,8 +16,6 @@ Pixy is a powerful and versatile render engine designed to bring your digital cr
 
 - Scalability: Pixy is designed to take advantage of modern hardware and offers scalability options, allowing you to render on a single machine or distribute the workload across a network of computers for increased performance and faster render times.
 
-- Integration: Pixy provides extensive integration options with popular content creation tools, making it easy to incorporate the render engine into your existing workflow. Whether you're using industry-standard software like Maya, Blender, or 3ds Max, Pixy seamlessly integrates with these applications.
-
 ## Getting Started
 
 To get started with Pixy, follow these steps:
@@ -45,10 +43,6 @@ If you encounter any issues or have technical questions, consult the documentati
 ## License
 
 Pixy Render Engine is available under a commercial license. Please review the license agreement provided with the software for more details regarding usage, restrictions, and redistribution.
-
-## Acknowledgments
-
-We would like to express our gratitude to the open-source community and the developers of various libraries and technologies that have contributed to Pixy. Without their efforts, this render engine would not have been possible.
 
 ## About
 
