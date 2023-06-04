@@ -52,8 +52,5 @@ We would like to express our gratitude to the open-source community and the deve
 
 ## About
 
-Pixy Render Engine is developed and maintained by [Your Company Name]. We are a passionate team of artists and engineers dedicated to pushing the boundaries of visual storytelling through cutting-edge rendering technology.
-
-Visit our website [yourwebsite.com](https://www.yourwebsite.com) to learn more about Pixy, explore our portfolio, and stay updated with the latest news and developments.
-
+Pixy Render Engine is developed and maintained by Caleb Burnett. 
 Thank you for choosing Pixy Render Engine. We look forward to seeing the amazing creations you will bring to life!
