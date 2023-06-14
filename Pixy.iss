@@ -3,7 +3,7 @@
 
 #define MyAppName "Pixy"
 #define MyAppVersion "1.0"
-#define MyAppExeName "MyProg.exe"
+#define MyAppExeName "Pixy.exe"
 #define MyAppAssocName MyAppName + ""
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
