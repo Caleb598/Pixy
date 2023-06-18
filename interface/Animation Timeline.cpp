@@ -1,73 +1,123 @@
-g++ your_program.cpp -o your_program -lncurses
-#include <iostream>
-#include <ncurses.h>
+#include <QtWidgets>
+#include <QtCharts>
 
-const int ROWS = 10;
-const int COLS = 1000000;
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
 
-int main() {
-    // Initialize ncurses
-    initscr();
-    start_color();
-    init_pair(1, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(2, COLOR_CYAN, COLOR_BLACK);
-    init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(4, COLOR_GREEN, COLOR_BLACK);
+    // Create the main window
+    QMainWindow mainWindow;
+    mainWindow.setWindowTitle("Four Window Interface");
+    mainWindow.resize(800, 600);
 
-    // Declare and initialize the 2D array
-    std::string chart[ROWS][COLS];
+    // Create the layout for the main window
+    QVBoxLayout layout(&mainWindow);
 
-    // Assigning labels to the first row of the first column
-    chart[0][0] = "Frame";
-    chart[1][0] = "Move X";
-    chart[2][0] = "Move Y";
-    chart[3][0] = "Move Z";
-    chart[4][0] = "Rotate X";
-    chart[5][0] = "Rotate Y";
-    chart[6][0] = "Rotate Z";
-    chart[7][0] = "Size X";
-    chart[8][0] = "Size Y";
-    chart[9][0] = "Size Z";
+    // Create the top-right window
+    QWidget topRightWindow;
+    topRightWindow.setStyleSheet("background-color: lightgray;");
+    topRightWindow.setWindowTitle("Pixy Scene Collection");
 
-    // Assigning numbers to the other columns in the first row
-    for (int j = 1; j < COLS; ++j) {
-        chart[0][j] = std::to_string(j);
+    // Create the bottom window
+    QWidget bottomWindow;
+    bottomWindow.setStyleSheet("background-color: lightgray;");
+    bottomWindow.setWindowTitle("Pixy Animation");
+
+    // Create the right corner window
+    QWidget rightCornerWindow;
+    rightCornerWindow.setStyleSheet("background-color: lightgray;");
+    rightCornerWindow.setWindowTitle("Pixy Settings");
+
+    // Create the remaining window
+    QWidget remainingWindow;
+    remainingWindow.setStyleSheet("background-color: white;");
+    remainingWindow.setWindowTitle("Pixy Viewport");
+
+    // Add the windows to the layout
+    layout.addWidget(&topRightWindow);
+    layout.addWidget(&remainingWindow);
+
+    // Create a horizontal layout for the bottom window and right corner window
+    QHBoxLayout bottomLayout;
+    bottomLayout.addWidget(&bottomWindow);
+    bottomLayout.addWidget(&rightCornerWindow);
+    layout.addLayout(&bottomLayout);
+
+    // Create a chart view
+    QtCharts::QChartView chartView(&bottomWindow);
+    chartView.setRenderHint(QPainter::Antialiasing);
+
+    // Create a chart
+    QtCharts::QChart chart;
+    chart.setTitle("Chart with 101 Columns and 10 Rows");
+
+    // Create a bar series
+    QtCharts::QBarSeries series;
+
+    // Generate random data for the chart
+    srand(time(nullptr));
+
+    // Labels for the first row
+    QStringList labels = {"Frame", "Move X", "Move Y", "Move Z", "Rotate X", "Rotate Y", "Rotate Z", "Size X", "Size Y", "Size Z"};
+
+    for (int i = 0; i < 10; ++i)
+    {
+        QtCharts::QBarSet *set = new QtCharts::QBarSet(labels.at(i));
+
+        for (int j = 0; j < 101; ++j)
+        {
+            set->append(rand() % 100);
+        }
+
+        // Set colors for specific cells in the first row
+        if (i == 0)
+        {
+            set->setColor(QColor("yellow"));
+        }
+        else if (i >= 1 && i <= 3)
+        {
+            set->setColor(QColor("lightblue"));
+            set->setColorAt(j, QColor("lightblue"));
+        }
+        else if (i >= 4 && i <= 6)
+        {
+            set->setColor(QColor("purple"));
+            set->setColorAt(j, QColor("purple"));
+        }
+        else if (i >= 7 && i <= 9)
+        {
+            set->setColor(QColor("green"));
+            set->setColorAt(j, QColor("green"));
+        }
+
+        series.append(set);
     }
 
-    // Assigning colors to the first row
-    attron(COLOR_PAIR(1));
-    for (int j = 0; j < COLS; ++j) {
-        mvprintw(0, j, chart[0][j].c_str());
-    }
-    attroff(COLOR_PAIR(1));
+    // Add the series to the chart
+    chart.addSeries(&series);
 
-    // Assigning colors to specific columns in the first column
-    attron(COLOR_PAIR(2));
-    for (int i = 1; i < 4; ++i) {
-        mvprintw(i, 0, chart[i][0].c_str());
-    }
-    attroff(COLOR_PAIR(2));
+    // Create an axis for the X-axis
+    QtCharts::QValueAxis xAxis;
+    xAxis.setTickCount(10); // Set the number of ticks on the X-axis
+    xAxis.setTitleText("Columns");
+    chart.addAxis(&xAxis, Qt::AlignBottom);
+    series.attachAxis(&xAxis);
 
-    attron(COLOR_PAIR(3));
-    for (int i = 4; i < 7; ++i) {
-        mvprintw(i, 0, chart[i][0].c_str());
-    }
-    attroff(COLOR_PAIR(3));
+    // Create an axis for the Y-axis
+    QtCharts::QValueAxis yAxis;
+    yAxis.setTitleText("Values");
+    chart.addAxis(&yAxis, Qt::AlignLeft);
+    series.attachAxis(&yAxis);
 
-    attron(COLOR_PAIR(4));
-    for (int i = 7; i < 10; ++i) {
-        mvprintw(i, 0, chart[i][0].c_str());
-    }
-    attroff(COLOR_PAIR(4));
+    // Set the chart as the chart view's chart
+    chartView.setChart(&chart);
 
-    // Refresh the window
-    refresh();
+    // Set the chart view as the central widget of the bottom window
+    QVBoxLayout bottomWindowLayout(&bottomWindow);
+    bottomWindowLayout.addWidget(&chartView);
+    bottomWindow.setLayout(&bottomWindowLayout);
 
-    // Wait for user input
-    getch();
+    mainWindow.show();
 
-    // Clean up ncurses
-    endwin();
-
-    return 0;
+    return app.exec();
 }
