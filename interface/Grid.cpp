@@ -1,41 +1,61 @@
-#include <iostream>
-#include <unordered_map>
+#include <QtWidgets>
 
-using namespace std;
+class InfiniteGrid : public QGraphicsScene
+{
+public:
+    InfiniteGrid(QObject* parent = nullptr) : QGraphicsScene(parent)
+    {
+        setSceneRect(-1000, -1000, 2000, 2000);
+    }
 
-struct Point {
-    int x;
-    int y;
+    void drawBackground(QPainter* painter, const QRectF& rect) override
+    {
+        Q_UNUSED(rect);
 
-    Point(int xCoord, int yCoord) : x(xCoord), y(yCoord) {}
+        // Set the background color
+        painter->fillRect(sceneRect(), Qt::white);
 
-    bool operator==(const Point& other) const {
-        return x == other.x && y == other.y;
+        // Set the grid properties
+        QPen pen(Qt::lightGray);
+        pen.setWidth(1);
+
+        const int gridSize = 20; // Size of each grid square
+
+        // Draw vertical lines
+        for (qreal x = sceneRect().left(); x < sceneRect().right(); x += gridSize)
+        {
+            painter->setPen(pen);
+            painter->drawLine(QPointF(x, sceneRect().top()), QPointF(x, sceneRect().bottom()));
+        }
+
+        // Draw horizontal lines
+        for (qreal y = sceneRect().top(); y < sceneRect().bottom(); y += gridSize)
+        {
+            painter->setPen(pen);
+            painter->drawLine(QPointF(sceneRect().left(), y), QPointF(sceneRect().right(), y));
+        }
     }
 };
 
-struct PointHash {
-    size_t operator()(const Point& p) const {
-        size_t h1 = hash<int>{}(p.x);
-        size_t h2 = hash<int>{}(p.y);
-        return h1 ^ h2;
-    }
-};
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
 
-int main() {
-    unordered_map<Point, int, PointHash> grid;
+    // Create the main window
+    QMainWindow mainWindow;
+    mainWindow.setWindowTitle("Pixy Viewport");
+    mainWindow.resize(800, 600);
 
-    // Set values at specific coordinates
-    grid[Point(0, 0)] = 1;
-    grid[Point(2, -1)] = 5;
-    grid[Point(10, 10)] = 20;
+    // Create the graphics view
+    QGraphicsView graphicsView(&mainWindow);
 
-    // Accessing and printing the grid values
-    for (const auto& pair : grid) {
-        const Point& point = pair.first;
-        int value = pair.second;
-        cout << "Coordinates: (" << point.x << ", " << point.y << "), Value: " << value << endl;
-    }
+    // Create the infinite grid scene
+    InfiniteGrid infiniteGrid;
+    graphicsView.setScene(&infiniteGrid);
 
-    return 0;
+    // Set the graphics view as the central widget
+    mainWindow.setCentralWidget(&graphicsView);
+    mainWindow.show();
+
+    return app.exec();
 }
