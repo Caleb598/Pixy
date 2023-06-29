@@ -1,61 +1,40 @@
-#include <QtWidgets>
+#include <iostream>
+#include <unordered_map>
 
-class InfiniteGrid : public QGraphicsScene
-{
+using namespace std;
+
+class InfiniteGrid {
+private:
+    unordered_map<int, unordered_map<int, int>> grid;
+
 public:
-    InfiniteGrid(QObject* parent = nullptr) : QGraphicsScene(parent)
-    {
-        setSceneRect(-1000, -1000, 2000, 2000);
+    int getValue(int x, int y) const {
+        if (grid.count(x) > 0 && grid.at(x).count(y) > 0) {
+            return grid.at(x).at(y);
+        }
+        return 0; // Default value for undefined cells
     }
 
-    void drawBackground(QPainter* painter, const QRectF& rect) override
-    {
-        Q_UNUSED(rect);
-
-        // Set the background color
-        painter->fillRect(sceneRect(), Qt::white);
-
-        // Set the grid properties
-        QPen pen(Qt::lightGray);
-        pen.setWidth(1);
-
-        const int gridSize = 20; // Size of each grid square
-
-        // Draw vertical lines
-        for (qreal x = sceneRect().left(); x < sceneRect().right(); x += gridSize)
-        {
-            painter->setPen(pen);
-            painter->drawLine(QPointF(x, sceneRect().top()), QPointF(x, sceneRect().bottom()));
-        }
-
-        // Draw horizontal lines
-        for (qreal y = sceneRect().top(); y < sceneRect().bottom(); y += gridSize)
-        {
-            painter->setPen(pen);
-            painter->drawLine(QPointF(sceneRect().left(), y), QPointF(sceneRect().right(), y));
-        }
+    void setValue(int x, int y, int value) {
+        grid[x][y] = value;
     }
 };
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
+int main() {
+    InfiniteGrid grid;
 
-    // Create the main window
-    QMainWindow mainWindow;
-    mainWindow.setWindowTitle("Pixy Viewport");
-    mainWindow.resize(800, 600);
+    // Set values at specific coordinates
+    grid.setValue(0, 0, 1);
+    grid.setValue(2, -1, 5);
+    grid.setValue(10, 10, 20);
 
-    // Create the graphics view
-    QGraphicsView graphicsView(&mainWindow);
+    // Accessing and printing the grid values
+    for (int x = -5; x <= 5; ++x) {
+        for (int y = -5; y <= 5; ++y) {
+            int value = grid.getValue(x, y);
+            cout << "Coordinates: (" << x << ", " << y << "), Value: " << value << endl;
+        }
+    }
 
-    // Create the infinite grid scene
-    InfiniteGrid infiniteGrid;
-    graphicsView.setScene(&infiniteGrid);
-
-    // Set the graphics view as the central widget
-    mainWindow.setCentralWidget(&graphicsView);
-    mainWindow.show();
-
-    return app.exec();
+    return 0;
 }
