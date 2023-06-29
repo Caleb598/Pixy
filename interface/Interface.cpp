@@ -1,48 +1,69 @@
-#include <QtWidgets>
+#include <QApplication>
+#include <QMainWindow>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QSplitter>
+#include <QFrame>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
     // Create the main window
-    QWidget mainWindow;
-    mainWindow.setWindowTitle("Four Window Interface");
-    mainWindow.resize(800, 600);
+    QMainWindow window;
 
-    // Create the layout for the main window
-    QVBoxLayout layout(&mainWindow);
+    // Create the central widget
+    QWidget *centralWidget = new QWidget(&window);
+    window.setCentralWidget(centralWidget);
+
+    // Create a horizontal layout for the central widget
+    QHBoxLayout *centralLayout = new QHBoxLayout(centralWidget);
+
+    // Create a splitter widget to divide the central widget into two parts
+    QSplitter *splitter1 = new QSplitter(Qt::Vertical, centralWidget);
+    centralLayout->addWidget(splitter1);
 
     // Create the top-right window
-    QWidget topRightWindow;
-    topRightWindow.setStyleSheet("background-color: lightgray;");
-    topRightWindow.setWindowTitle("Pixy Scene Collection");
+    QWidget *topRightWindow = new QFrame(splitter1);
+    topRightWindow->setStyleSheet("background-color: lightgray;");
+    topRightWindow->setMinimumSize(200, 200);
+    topRightWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    topRightWindow->setWindowTitle("Rendero Scene Collection");
 
-    // Create the bottom window
-    QWidget bottomWindow;
-    bottomWindow.setStyleSheet("background-color: lightgray;");
-    bottomWindow.setWindowTitle("Pixy Animation");
-
-    // Create the right corner window
-    QWidget rightCornerWindow;
-    rightCornerWindow.setStyleSheet("background-color: lightgray;");
-    rightCornerWindow.setWindowTitle("Pixy Settings");
+    // Create a splitter widget to divide the bottom part of the central widget
+    QSplitter *splitter2 = new QSplitter(Qt::Horizontal, splitter1);
+    splitter1->addWidget(splitter2);
 
     // Create the remaining window
-    QWidget remainingWindow;
-    remainingWindow.setStyleSheet("background-color: white;");
-    remainingWindow.setWindowTitle("Pixy Viewport");
+    QWidget *remainingWindow = new QFrame(splitter1);
+    remainingWindow->setStyleSheet("background-color: white;");
+    remainingWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    remainingWindow->setWindowTitle("Rendero Viewport");
 
-    // Add the windows to the layout
-    layout.addWidget(&topRightWindow);
-    layout.addWidget(&remainingWindow);
+    // Create the bottom window
+    QWidget *bottomWindow = new QFrame(&window);
+    bottomWindow->setStyleSheet("background-color: lightgray;");
+    bottomWindow->setMinimumHeight(100);
+    bottomWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    bottomWindow->setWindowTitle("Rendero Animation");
 
-    // Create a horizontal layout for the bottom window and right corner window
-    QHBoxLayout bottomLayout;
-    bottomLayout.addWidget(&bottomWindow);
-    bottomLayout.addWidget(&rightCornerWindow);
-    layout.addLayout(&bottomLayout);
+    // Add the bottom window to the main window
+    window.setCentralWidget(centralWidget);
+    window.setUnifiedTitleAndToolBarOnMac(true);
+    window.addToolBar(Qt::TopToolBarArea, new QToolBar(&window));
+    window.setStatusBar(new QStatusBar(&window));
+    window.setCentralWidget(centralWidget);
+    window.setDockNestingEnabled(true);
+    window.setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+    window.setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
-    mainWindow.show();
+    // Set the layout for the central widget
+    centralWidget->setLayout(centralLayout);
+
+    // Add the bottom window to the layout
+    centralLayout->addWidget(bottomWindow);
+
+    window.show();
 
     return app.exec();
 }
